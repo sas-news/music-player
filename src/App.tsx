@@ -75,23 +75,13 @@ function App() {
     }
   };
 
-  const handleFolderSelect = async () => {
-    try {
-      const dirHandle = await (window as any).showDirectoryPicker();
-      const audioFiles: File[] = [];
-      setFolderName(dirHandle.name); // フォルダ名を設定
-
-      for await (const entry of dirHandle.values()) {
-        if (entry.kind === "file" && entry.name.endsWith(".mp3")) {
-          const file: File = await entry.getFile();
-          audioFiles.push(file);
-        }
-      }
-
-      setFiles(audioFiles);
-    } catch (error) {
-      console.error("フォルダ選択エラー:", error);
-    }
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files || []);
+    const audioFiles = selectedFiles.filter((file) =>
+      file.name.endsWith(".mp3")
+    );
+    setFiles(audioFiles);
+    setFolderName("選択されたファイル");
   };
 
   const playRandomSong = () => {
@@ -160,7 +150,7 @@ function App() {
   return (
     <div>
       <h1>Music Player</h1>
-      <button onClick={handleFolderSelect}>フォルダを選択</button>
+      <input type="file" multiple accept=".mp3" onChange={handleFileSelect} />
       <br />
       {folderName && <p>選択されたフォルダ: {folderName}</p>}
       <button onClick={loadStateFromLocalStorage}>ロード</button>
