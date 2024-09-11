@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "./App.css"; // CSSファイルをインポート
+import "./App.css";
 
 function App() {
   const [files, setFiles] = useState<File[]>([]);
@@ -68,7 +68,6 @@ function App() {
         newAudio.ontimeupdate = () => setCurrentTime(newAudio.currentTime);
         newAudio.onloadedmetadata = () => setDuration(newAudio.duration);
 
-        // 追加: 再生と停止のイベントリスナー
         newAudio.onplay = () => setIsPlaying(true);
         newAudio.onpause = () => setIsPlaying(false);
       }
@@ -82,6 +81,23 @@ function App() {
     );
     setFiles(audioFiles);
     setFolderName("選択されたファイル");
+  };
+
+  const handleDirectorySelect = async () => {
+    try {
+      const dirHandle = await (window as any).showDirectoryPicker();
+      const audioFiles: File[] = [];
+      for await (const entry of dirHandle.values()) {
+        if (entry.kind === "file" && entry.name.endsWith(".mp3")) {
+          const file = await entry.getFile();
+          audioFiles.push(file);
+        }
+      }
+      setFiles(audioFiles);
+      setFolderName(dirHandle.name);
+    } catch (error) {
+      console.error("ディレクトリ選択エラー: ", error);
+    }
   };
 
   const playRandomSong = () => {
@@ -113,7 +129,6 @@ function App() {
     newAudio.ontimeupdate = () => setCurrentTime(newAudio.currentTime);
     newAudio.onloadedmetadata = () => setDuration(newAudio.duration);
 
-    // 追加: 再生と停止のイベントリスナー
     newAudio.onplay = () => setIsPlaying(true);
     newAudio.onpause = () => setIsPlaying(false);
   };
@@ -150,7 +165,11 @@ function App() {
   return (
     <div>
       <h1>Music Player</h1>
-      <input type="file" multiple accept=".mp3" onChange={handleFileSelect} />
+      {"showDirectoryPicker" in window ? (
+        <button onClick={handleDirectorySelect}>フォルダを選択</button>
+      ) : (
+        <input type="file" multiple accept=".mp3" onChange={handleFileSelect} />
+      )}
       <br />
       {folderName && <p>選択されたフォルダ: {folderName}</p>}
       <button onClick={loadStateFromLocalStorage}>ロード</button>
