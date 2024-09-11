@@ -162,13 +162,26 @@ function App() {
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
+  const playSong = (index: number) => {
+    playNextSong(playOrder, index);
+  };
+
   return (
     <div>
       <h1>Music Player</h1>
       {"showDirectoryPicker" in window ? (
         <button onClick={handleDirectorySelect}>フォルダを選択</button>
       ) : (
-        <input type="file" multiple accept=".mp3" onChange={handleFileSelect} />
+        <>
+          <input
+            type="file"
+            id="files"
+            multiple
+            accept=".mp3"
+            onChange={handleFileSelect}
+          />
+          <label htmlFor="files">ファイルを選択</label>
+        </>
       )}
       <br />
       {folderName && <p>選択されたフォルダ: {folderName}</p>}
@@ -199,7 +212,11 @@ function App() {
       )}
       <ul>
         {playOrder.map((file, index) => (
-          <li key={index} className={file === currentFile ? "playing" : ""}>
+          <li
+            key={index}
+            className={file === currentFile ? "playing" : ""}
+            onClick={() => playSong(index)}
+          >
             {file.name}
           </li>
         ))}
