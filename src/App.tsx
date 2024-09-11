@@ -169,10 +169,10 @@ function App() {
   return (
     <div>
       <h1>Music Player</h1>
-      {"showDirectoryPicker" in window ? (
+      {false ? (
         <button onClick={handleDirectorySelect}>フォルダを選択</button>
       ) : (
-        <>
+        <button>
           <input
             type="file"
             id="files"
@@ -181,7 +181,7 @@ function App() {
             onChange={handleFileSelect}
           />
           <label htmlFor="files">ファイルを選択</label>
-        </>
+        </button>
       )}
       <br />
       {folderName && <p>選択されたフォルダ: {folderName}</p>}
