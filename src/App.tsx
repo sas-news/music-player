@@ -57,6 +57,10 @@ function App() {
 
       if (file) {
         const audioUrl = URL.createObjectURL(file);
+        if (audio) {
+          audio.pause();
+          URL.revokeObjectURL(audio.src);
+        }
         const newAudio = new Audio(audioUrl);
         setAudio(newAudio);
         newAudio.play();
@@ -80,12 +84,25 @@ function App() {
       file.name.endsWith(".mp3")
     );
     setFiles(audioFiles);
+    setPlayOrder(audioFiles);
     setFolderName("選択されたファイル");
   };
 
   const handleDirectorySelect = async () => {
+    type DirectoryPickerHandle = {
+      name: string;
+      values(): AsyncIterable<{
+        kind: string;
+        name: string;
+        getFile(): Promise<File>;
+      }>;
+    };
     try {
-      const dirHandle = await (window as any).showDirectoryPicker();
+      const dirHandle = await (
+        window as unknown as {
+          showDirectoryPicker: () => Promise<DirectoryPickerHandle>;
+        }
+      ).showDirectoryPicker();
       const audioFiles: File[] = [];
       for await (const entry of dirHandle.values()) {
         if (entry.kind === "file" && entry.name.endsWith(".mp3")) {
@@ -94,6 +111,7 @@ function App() {
         }
       }
       setFiles(audioFiles);
+      setPlayOrder(audioFiles);
       setFolderName(dirHandle.name);
     } catch (error) {
       console.error("ディレクトリ選択エラー: ", error);
@@ -169,6 +187,7 @@ function App() {
   return (
     <div>
       <h1>Music Player</h1>
+      {/* eslint-disable-next-line no-constant-condition -- iOS Safari は showDirectoryPicker 非対応のため無効化中 */}
       {false ? (
         <button onClick={handleDirectorySelect}>フォルダを選択</button>
       ) : (
